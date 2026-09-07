@@ -17,6 +17,7 @@ import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persist
 import { queryClient } from "./components/queryClient";
 import Account from "./pages/Account";
 import BusinessDetails from "./pages/BusinessDetails";
+import Onboarding from "./pages/Onboarding";
 
 const persister = createSyncStoragePersister({
   storage: window.localStorage,
