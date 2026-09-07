@@ -5,9 +5,6 @@ import AuthLayout from "./layouts/AuthLayout";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import Onboarding from "./pages/Onboarding";
-import Businessdetails from "./pages/Businessdetails";
-// import AccountStatusGuard from "./components/Accountstatusguard";
 import { supabase } from "./components/supabaseClient";
 import { useAccountStore } from "./store/UseAccountStore";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -19,6 +16,7 @@ import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { queryClient } from "./components/queryClient";
 import Account from "./pages/Account";
+import BusinessDetails from "./pages/BusinessDetails";
 
 const persister = createSyncStoragePersister({
   storage: window.localStorage,
@@ -59,7 +57,7 @@ export default function App() {
         <Route element={<AppShell />}>
           {/* Outside the guard on purpose: the one route a pending client
             with no submitted profile must still be able to reach. */}
-          <Route path="/business-details" element={<Businessdetails />} />
+          <Route path="/business-details" element={<BusinessDetails />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/home" element={<Home />} />
