@@ -21,10 +21,6 @@ const PHONE_PATTERN = /^(\+234|0)[789][01]\d{8}$/;
 const SEND_OTP_FUNCTION = "send-signup-otp";
 const VERIFY_OTP_FUNCTION = "verify-signup-otp";
 
-// Where to send the user once their account is created and they're
-// logged in automatically.
-// const POST_SIGNUP_ROUTE = "/home";
-
 const routeAfterVerification = (billing) =>
   billing === "recurring" ? "/business-details" : "/home";
 const OTP_LENGTH = 6;
@@ -51,8 +47,6 @@ const Signup = () => {
   const [onboarding, setOnboarding] = useState(null);
 
   useEffect(() => {
-    // Prefer fresh router state (just came from onboarding); fall back to
-    // sessionStorage (e.g. user refreshed this page).
     const fromRouter = location.state?.onboarding;
     if (fromRouter) {
       setOnboarding(fromRouter);
@@ -64,7 +58,6 @@ const Signup = () => {
     } catch {}
   }, [location.state]);
 
-  // step: "form" (collect details) → "otp" (verify email)
   const [step, setStep] = useState("form");
 
   const [showPassword, setShowPassword] = useState(false);
@@ -78,7 +71,6 @@ const Signup = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // --- OTP step state ---
   const [otpDigits, setOtpDigits] = useState(Array(OTP_LENGTH).fill(""));
   const [otpError, setOtpError] = useState("");
   const [verifying, setVerifying] = useState(false);
@@ -134,7 +126,6 @@ const Signup = () => {
     if (fnError) throw fnError;
   };
 
-  // Step 1: validate details, request an OTP, move to verification.
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -201,9 +192,6 @@ const Signup = () => {
 
       if (fnError) throw fnError;
       if (data?.error === "email_taken") {
-        // The email became registered between sending the code and
-        // verifying it (e.g. a duplicate signup elsewhere). No amount of
-        // re-entering the OTP fixes this — send them back to change email.
         setStep("form");
         setFieldErrors((prev) => ({
           ...prev,
@@ -226,7 +214,6 @@ const Signup = () => {
         return;
       }
 
-      // Log the newly created account in automatically.
       const { error: sessionError } = await supabase.auth.setSession({
         access_token: session.access_token,
         refresh_token: session.refresh_token,
@@ -234,7 +221,6 @@ const Signup = () => {
       if (sessionError) throw sessionError;
 
       sessionStorage.removeItem(ONBOARDING_STORAGE_KEY);
-      // navigate(POST_SIGNUP_ROUTE);
       navigate(routeAfterVerification(onboarding?.billing));
     } catch {
       setOtpError(OTP_ERROR_MESSAGES.default);
@@ -257,7 +243,6 @@ const Signup = () => {
       return;
     }
 
-    // Handle paste of the full code into one box.
     if (value.length > 1) {
       const chars = value.slice(0, OTP_LENGTH).split("");
       setOtpDigits((prev) => {
@@ -302,383 +287,389 @@ const Signup = () => {
   };
 
   return (
-    <div
-      className="min-h-dvh flex flex-col bg-white px-6"
-      style={{
-        paddingTop: "max(env(safe-area-inset-top), 2rem)",
-        paddingBottom: "max(env(safe-area-inset-bottom), 1.5rem)",
-      }}
-    >
-      {/* Brand mark */}
-      <div className="flex flex-col items-center pt-4 pb-8">
-        <img src={TuuraaLogo} alt="Tuuraa" width={88} />
-      </div>
-
-      {step === "form" ? (
-        <>
-          {/* Heading */}
-          <div className="mb-6">
-            <h1 className="font-poppins font-semibold text-2xl text-neutral-900">
-              Create your account
-            </h1>
-            <p className="font-poppins text-sm text-neutral-500 mt-1">
-              Set up your business in a few minutes
-            </p>
-          </div>
-
-          {/* Server error */}
-          {error && (
-            <div
-              role="alert"
-              className="mb-4 flex items-start gap-2.5 rounded-xl bg-red-50 border border-red-100 px-4 py-3"
-            >
-              <FiAlertCircle
-                className="text-red-500 mt-0.5 shrink-0"
-                size={16}
-              />
-              <p className="font-poppins text-xs text-red-700 leading-relaxed">
-                {error}
+    // Outer full-bleed wrapper: on a real device or installed PWA this is
+    // invisible (content already fills the viewport). On a wider browser
+    // tab/tablet it stops the form from stretching edge-to-edge.
+    <div className="min-h-dvh bg-white sm:bg-neutral-50 flex sm:justify-center">
+      <div
+        className="min-h-dvh w-full sm:max-w-[430px] flex flex-col bg-white px-6"
+        style={{
+          paddingTop: "max(env(safe-area-inset-top), 2rem)",
+          paddingBottom: "max(env(safe-area-inset-bottom), 1.5rem)",
+        }}
+      >
+        {step === "form" ? (
+          <>
+            <div className="mb-6">
+              <h1 className="font-poppins font-semibold text-2xl text-neutral-900">
+                Create your account
+              </h1>
+              <p className="font-poppins text-sm text-neutral-500 mt-1">
+                Set up your business in a few minutes
               </p>
             </div>
-          )}
 
-          {/* Form */}
-          <form
-            onSubmit={handleSubmit}
-            noValidate
-            className="flex flex-col gap-4"
-          >
-            <div>
-              <label
-                htmlFor="businessName"
-                className="font-poppins text-xs font-medium text-neutral-600 mb-1.5 block"
+            {error && (
+              <div
+                role="alert"
+                className="mb-4 flex items-start gap-2.5 rounded-xl bg-red-50 border border-red-100 px-4 py-3"
               >
-                Business name
-              </label>
-              <div className="relative">
-                <MdOutlineBusinessCenter
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400"
-                  size={18}
+                <FiAlertCircle
+                  className="text-red-500 mt-0.5 shrink-0"
+                  size={16}
                 />
-                <input
-                  id="businessName"
-                  type="text"
-                  name="businessName"
-                  value={form.businessName}
-                  onChange={handleChange}
-                  placeholder="Fresh Meal Prep"
-                  autoComplete="organization"
-                  aria-invalid={!!fieldErrors.businessName}
-                  aria-describedby={
-                    fieldErrors.businessName ? "businessName-error" : undefined
-                  }
-                  className={`w-full h-12 pl-11 pr-4 rounded-xl border bg-neutral-50
-                             font-poppins text-base text-neutral-900 placeholder:text-neutral-400
-                             focus:outline-none focus:ring-2 focus:border-transparent
-                             transition ${
-                               fieldErrors.businessName
-                                 ? "border-red-300 focus:ring-red-400"
-                                 : "border-neutral-200 focus:ring-emerald-700"
-                             }`}
-                />
-              </div>
-              {fieldErrors.businessName && (
-                <p
-                  id="businessName-error"
-                  className="font-poppins text-xs text-red-600 mt-1.5"
-                >
-                  {fieldErrors.businessName}
+                <p className="font-poppins text-xs text-red-700 leading-relaxed">
+                  {error}
                 </p>
-              )}
-            </div>
-
-            <div>
-              <label
-                htmlFor="email"
-                className="font-poppins text-xs font-medium text-neutral-600 mb-1.5 block"
-              >
-                Email
-              </label>
-              <div className="relative">
-                <FiMail
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400"
-                  size={18}
-                />
-                <input
-                  id="email"
-                  type="email"
-                  name="email"
-                  value={form.email}
-                  onChange={handleChange}
-                  placeholder="you@business.com"
-                  autoComplete="email"
-                  inputMode="email"
-                  aria-invalid={!!fieldErrors.email}
-                  aria-describedby={
-                    fieldErrors.email ? "email-error" : undefined
-                  }
-                  className={`w-full h-12 pl-11 pr-4 rounded-xl border bg-neutral-50
-                             font-poppins text-base text-neutral-900 placeholder:text-neutral-400
-                             focus:outline-none focus:ring-2 focus:border-transparent
-                             transition ${
-                               fieldErrors.email
-                                 ? "border-red-300 focus:ring-red-400"
-                                 : "border-neutral-200 focus:ring-emerald-700"
-                             }`}
-                />
               </div>
-              {fieldErrors.email && (
-                <p
-                  id="email-error"
-                  className="font-poppins text-xs text-red-600 mt-1.5"
-                >
-                  {fieldErrors.email}
-                </p>
-              )}
-            </div>
+            )}
 
-            <div>
-              <label
-                htmlFor="phone"
-                className="font-poppins text-xs font-medium text-neutral-600 mb-1.5 block"
-              >
-                Phone number
-              </label>
-              <div className="relative">
-                <FiPhone
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400"
-                  size={18}
-                />
-                <input
-                  id="phone"
-                  type="tel"
-                  name="phone"
-                  value={form.phone}
-                  onChange={handleChange}
-                  placeholder="080X XXX XXXX"
-                  autoComplete="tel"
-                  inputMode="tel"
-                  aria-invalid={!!fieldErrors.phone}
-                  aria-describedby={
-                    fieldErrors.phone ? "phone-error" : undefined
-                  }
-                  className={`w-full h-12 pl-11 pr-4 rounded-xl border bg-neutral-50
-                             font-poppins text-base text-neutral-900 placeholder:text-neutral-400
-                             focus:outline-none focus:ring-2 focus:border-transparent
-                             transition ${
-                               fieldErrors.phone
-                                 ? "border-red-300 focus:ring-red-400"
-                                 : "border-neutral-200 focus:ring-emerald-700"
-                             }`}
-                />
+            <form
+              onSubmit={handleSubmit}
+              noValidate
+              className="flex flex-col gap-4"
+            >
+              <div>
+                <label
+                  htmlFor="businessName"
+                  className="font-poppins text-xs font-medium text-neutral-600 mb-1.5 block"
+                >
+                  Business name
+                </label>
+                <div className="relative">
+                  <MdOutlineBusinessCenter
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400"
+                    size={18}
+                  />
+                  <input
+                    id="businessName"
+                    type="text"
+                    name="businessName"
+                    value={form.businessName}
+                    onChange={handleChange}
+                    placeholder="Fresh Meal Prep"
+                    autoComplete="organization"
+                    aria-invalid={!!fieldErrors.businessName}
+                    aria-describedby={
+                      fieldErrors.businessName
+                        ? "businessName-error"
+                        : undefined
+                    }
+                    className={`w-full h-12 pl-11 pr-4 rounded-xl border bg-neutral-50
+                               font-poppins text-base text-neutral-900 placeholder:text-neutral-400
+                               focus:outline-none focus:ring-2 focus:border-transparent
+                               transition ${
+                                 fieldErrors.businessName
+                                   ? "border-red-300 focus:ring-red-400"
+                                   : "border-neutral-200 focus:ring-emerald-700"
+                               }`}
+                  />
+                </div>
+                {fieldErrors.businessName && (
+                  <p
+                    id="businessName-error"
+                    className="font-poppins text-xs text-red-600 mt-1.5"
+                  >
+                    {fieldErrors.businessName}
+                  </p>
+                )}
               </div>
-              {fieldErrors.phone && (
-                <p
-                  id="phone-error"
-                  className="font-poppins text-xs text-red-600 mt-1.5"
-                >
-                  {fieldErrors.phone}
-                </p>
-              )}
-            </div>
 
-            <div>
-              <label
-                htmlFor="password"
-                className="font-poppins text-xs font-medium text-neutral-600 mb-1.5 block"
+              <div>
+                <label
+                  htmlFor="email"
+                  className="font-poppins text-xs font-medium text-neutral-600 mb-1.5 block"
+                >
+                  Email
+                </label>
+                <div className="relative">
+                  <FiMail
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400"
+                    size={18}
+                  />
+                  <input
+                    id="email"
+                    type="email"
+                    name="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    placeholder="you@business.com"
+                    autoComplete="email"
+                    inputMode="email"
+                    aria-invalid={!!fieldErrors.email}
+                    aria-describedby={
+                      fieldErrors.email ? "email-error" : undefined
+                    }
+                    className={`w-full h-12 pl-11 pr-4 rounded-xl border bg-neutral-50
+                               font-poppins text-base text-neutral-900 placeholder:text-neutral-400
+                               focus:outline-none focus:ring-2 focus:border-transparent
+                               transition ${
+                                 fieldErrors.email
+                                   ? "border-red-300 focus:ring-red-400"
+                                   : "border-neutral-200 focus:ring-emerald-700"
+                               }`}
+                  />
+                </div>
+                {fieldErrors.email && (
+                  <p
+                    id="email-error"
+                    className="font-poppins text-xs text-red-600 mt-1.5"
+                  >
+                    {fieldErrors.email}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label
+                  htmlFor="phone"
+                  className="font-poppins text-xs font-medium text-neutral-600 mb-1.5 block"
+                >
+                  Phone number
+                </label>
+                <div className="relative">
+                  <FiPhone
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400"
+                    size={18}
+                  />
+                  <input
+                    id="phone"
+                    type="tel"
+                    name="phone"
+                    value={form.phone}
+                    onChange={handleChange}
+                    placeholder="080X XXX XXXX"
+                    autoComplete="tel"
+                    inputMode="tel"
+                    aria-invalid={!!fieldErrors.phone}
+                    aria-describedby={
+                      fieldErrors.phone ? "phone-error" : undefined
+                    }
+                    className={`w-full h-12 pl-11 pr-4 rounded-xl border bg-neutral-50
+                               font-poppins text-base text-neutral-900 placeholder:text-neutral-400
+                               focus:outline-none focus:ring-2 focus:border-transparent
+                               transition ${
+                                 fieldErrors.phone
+                                   ? "border-red-300 focus:ring-red-400"
+                                   : "border-neutral-200 focus:ring-emerald-700"
+                               }`}
+                  />
+                </div>
+                {fieldErrors.phone && (
+                  <p
+                    id="phone-error"
+                    className="font-poppins text-xs text-red-600 mt-1.5"
+                  >
+                    {fieldErrors.phone}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label
+                  htmlFor="password"
+                  className="font-poppins text-xs font-medium text-neutral-600 mb-1.5 block"
+                >
+                  Password
+                </label>
+                <div className="relative">
+                  <FiLock
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400"
+                    size={18}
+                  />
+                  <input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={form.password}
+                    onChange={handleChange}
+                    placeholder="At least 8 characters"
+                    autoComplete="new-password"
+                    minLength={8}
+                    aria-invalid={!!fieldErrors.password}
+                    aria-describedby={
+                      fieldErrors.password ? "password-error" : undefined
+                    }
+                    className={`w-full h-12 pl-11 pr-12 rounded-xl border bg-neutral-50
+                               font-poppins text-base text-neutral-900 placeholder:text-neutral-400
+                               focus:outline-none focus:ring-2 focus:border-transparent
+                               transition ${
+                                 fieldErrors.password
+                                   ? "border-red-300 focus:ring-red-400"
+                                   : "border-neutral-200 focus:ring-emerald-700"
+                               }`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 p-2.5 text-neutral-400"
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                    tabIndex={-1}
+                  >
+                    {showPassword ? (
+                      <FiEyeOff size={18} />
+                    ) : (
+                      <FiEye size={18} />
+                    )}
+                  </button>
+                </div>
+                {fieldErrors.password && (
+                  <p
+                    id="password-error"
+                    className="font-poppins text-xs text-red-600 mt-1.5"
+                  >
+                    {fieldErrors.password}
+                  </p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="mt-2 h-12 rounded-xl bg-emerald-900 text-white font-poppins font-medium text-sm
+                           flex items-center justify-center gap-2 active:scale-[0.98] transition
+                           disabled:opacity-60 disabled:active:scale-100"
               >
-                Password
-              </label>
-              <div className="relative">
-                <FiLock
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400"
-                  size={18}
-                />
-                <input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  value={form.password}
-                  onChange={handleChange}
-                  placeholder="At least 8 characters"
-                  autoComplete="new-password"
-                  minLength={8}
-                  aria-invalid={!!fieldErrors.password}
-                  aria-describedby={
-                    fieldErrors.password ? "password-error" : undefined
-                  }
-                  className={`w-full h-12 pl-11 pr-11 rounded-xl border bg-neutral-50
-                             font-poppins text-base text-neutral-900 placeholder:text-neutral-400
-                             focus:outline-none focus:ring-2 focus:border-transparent
-                             transition ${
-                               fieldErrors.password
-                                 ? "border-red-300 focus:ring-red-400"
-                                 : "border-neutral-200 focus:ring-emerald-700"
-                             }`}
-                />
+                {loading ? (
+                  <>
+                    <span className="w-4 h-4 rounded-full border-2 border-white/40 border-t-white animate-spin" />
+                    Sending code...
+                  </>
+                ) : (
+                  <>
+                    Create account
+                    <FiArrowRight size={16} />
+                  </>
+                )}
+              </button>
+
+              <p className="font-poppins text-[11px] text-neutral-400 text-center leading-relaxed px-2">
+                By creating an account, you agree to Tuuraa's Terms of Service
+                and Privacy Policy.
+              </p>
+            </form>
+
+            <div className="mt-auto pt-6 flex items-center justify-center gap-1">
+              <span className="font-poppins text-sm text-neutral-500">
+                Already have an account?
+              </span>
+              <Link
+                to="/login"
+                className="font-poppins text-sm font-semibold text-emerald-800"
+              >
+                Log in
+              </Link>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="mb-6">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-50 text-emerald-800 mb-4">
+                <FiShield size={20} />
+              </div>
+              <h1 className="font-poppins font-semibold text-2xl text-neutral-900">
+                Check your email
+              </h1>
+              <p className="font-poppins text-sm text-neutral-500 mt-1">
+                Enter the {OTP_LENGTH}-digit code we sent to{" "}
+                <span className="font-medium text-neutral-700">
+                  {maskEmail(form.email.trim())}
+                </span>
+                .{" "}
                 <button
                   type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                  tabIndex={-1}
+                  onClick={handleEditEmail}
+                  className="font-semibold text-emerald-800 py-1 px-0.5 -my-1"
                 >
-                  {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                  Edit
                 </button>
-              </div>
-              {fieldErrors.password && (
-                <p
-                  id="password-error"
-                  className="font-poppins text-xs text-red-600 mt-1.5"
-                >
-                  {fieldErrors.password}
+              </p>
+            </div>
+
+            {otpError && (
+              <div
+                role="alert"
+                className="mb-4 flex items-start gap-2.5 rounded-xl bg-red-50 border border-red-100 px-4 py-3"
+              >
+                <FiAlertCircle
+                  className="text-red-500 mt-0.5 shrink-0"
+                  size={16}
+                />
+                <p className="font-poppins text-xs text-red-700 leading-relaxed">
+                  {otpError}
                 </p>
-              )}
+              </div>
+            )}
+
+            {/* flex-1 + basis-0 makes each box take an equal share of the
+                remaining width after gaps, so this scales down cleanly on
+                narrow phones (≥320px) instead of overflowing the row */}
+            <div className="flex gap-2">
+              {otpDigits.map((digit, i) => (
+                <input
+                  key={i}
+                  ref={(el) => (otpInputRefs.current[i] = el)}
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete={i === 0 ? "one-time-code" : "off"}
+                  maxLength={OTP_LENGTH}
+                  value={digit}
+                  disabled={verifying}
+                  onChange={(e) => handleOtpChange(i, e.target.value)}
+                  onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                  aria-label={`Digit ${i + 1} of verification code`}
+                  className={`h-14 flex-1 min-w-0 max-w-12 rounded-xl border bg-neutral-50 text-center
+                             font-poppins text-lg font-semibold text-neutral-900
+                             focus:outline-none focus:ring-2 focus:border-transparent
+                             transition disabled:opacity-60 ${
+                               otpError
+                                 ? "border-red-300 focus:ring-red-400"
+                                 : "border-neutral-200 focus:ring-emerald-700"
+                             }`}
+                />
+              ))}
             </div>
 
             <button
-              type="submit"
-              disabled={loading}
-              className="mt-2 h-12 rounded-xl bg-emerald-900 text-white font-poppins font-medium text-sm
+              type="button"
+              onClick={() => submitOtp(otpDigits.join(""))}
+              disabled={verifying || otpDigits.some((d) => !d)}
+              className="mt-6 h-12 rounded-xl bg-emerald-900 text-white font-poppins font-medium text-sm
                          flex items-center justify-center gap-2 active:scale-[0.98] transition
                          disabled:opacity-60 disabled:active:scale-100"
             >
-              {loading ? (
+              {verifying ? (
                 <>
                   <span className="w-4 h-4 rounded-full border-2 border-white/40 border-t-white animate-spin" />
-                  Sending code...
+                  Verifying...
                 </>
               ) : (
-                <>
-                  Create account
-                  <FiArrowRight size={16} />
-                </>
+                "Verify and continue"
               )}
             </button>
 
-            <p className="font-poppins text-[11px] text-neutral-400 text-center leading-relaxed px-2">
-              By creating an account, you agree to Tuuraa's Terms of Service and
-              Privacy Policy.
-            </p>
-          </form>
-
-          {/* Footer */}
-          <div className="mt-auto pt-6 flex items-center justify-center gap-1">
-            <span className="font-poppins text-sm text-neutral-500">
-              Already have an account?
-            </span>
-            <Link
-              to="/login"
-              className="font-poppins text-sm font-semibold text-emerald-800"
-            >
-              Log in
-            </Link>
-          </div>
-        </>
-      ) : (
-        <>
-          {/* OTP verification step */}
-          <div className="mb-6">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-50 text-emerald-800 mb-4">
-              <FiShield size={20} />
-            </div>
-            <h1 className="font-poppins font-semibold text-2xl text-neutral-900">
-              Check your email
-            </h1>
-            <p className="font-poppins text-sm text-neutral-500 mt-1">
-              Enter the {OTP_LENGTH}-digit code we sent to{" "}
-              <span className="font-medium text-neutral-700">
-                {maskEmail(form.email.trim())}
+            <div className="mt-5 flex items-center justify-center gap-1">
+              <span className="font-poppins text-sm text-neutral-500">
+                Didn't get a code?
               </span>
-              .{" "}
               <button
                 type="button"
-                onClick={handleEditEmail}
-                className="font-semibold text-emerald-800"
+                onClick={handleResend}
+                disabled={cooldown > 0 || resending}
+                className="font-poppins text-sm font-semibold text-emerald-800 disabled:text-neutral-400 disabled:font-medium py-1 px-0.5"
               >
-                Edit
+                {resending
+                  ? "Sending..."
+                  : cooldown > 0
+                    ? `Resend in ${cooldown}s`
+                    : "Resend code"}
               </button>
-            </p>
-          </div>
-
-          {otpError && (
-            <div
-              role="alert"
-              className="mb-4 flex items-start gap-2.5 rounded-xl bg-red-50 border border-red-100 px-4 py-3"
-            >
-              <FiAlertCircle
-                className="text-red-500 mt-0.5 shrink-0"
-                size={16}
-              />
-              <p className="font-poppins text-xs text-red-700 leading-relaxed">
-                {otpError}
-              </p>
             </div>
-          )}
-
-          <div className="flex justify-between gap-2">
-            {otpDigits.map((digit, i) => (
-              <input
-                key={i}
-                ref={(el) => (otpInputRefs.current[i] = el)}
-                type="text"
-                inputMode="numeric"
-                autoComplete={i === 0 ? "one-time-code" : "off"}
-                maxLength={OTP_LENGTH}
-                value={digit}
-                disabled={verifying}
-                onChange={(e) => handleOtpChange(i, e.target.value)}
-                onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                aria-label={`Digit ${i + 1} of verification code`}
-                className={`h-14 w-full max-w-12 rounded-xl border bg-neutral-50 text-center
-                           font-poppins text-lg font-semibold text-neutral-900
-                           focus:outline-none focus:ring-2 focus:border-transparent
-                           transition disabled:opacity-60 ${
-                             otpError
-                               ? "border-red-300 focus:ring-red-400"
-                               : "border-neutral-200 focus:ring-emerald-700"
-                           }`}
-              />
-            ))}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => submitOtp(otpDigits.join(""))}
-            disabled={verifying || otpDigits.some((d) => !d)}
-            className="mt-6 h-12 rounded-xl bg-emerald-900 text-white font-poppins font-medium text-sm
-                       flex items-center justify-center gap-2 active:scale-[0.98] transition
-                       disabled:opacity-60 disabled:active:scale-100"
-          >
-            {verifying ? (
-              <>
-                <span className="w-4 h-4 rounded-full border-2 border-white/40 border-t-white animate-spin" />
-                Verifying...
-              </>
-            ) : (
-              "Verify and continue"
-            )}
-          </button>
-
-          <div className="mt-5 flex items-center justify-center gap-1">
-            <span className="font-poppins text-sm text-neutral-500">
-              Didn't get a code?
-            </span>
-            <button
-              type="button"
-              onClick={handleResend}
-              disabled={cooldown > 0 || resending}
-              className="font-poppins text-sm font-semibold text-emerald-800 disabled:text-neutral-400 disabled:font-medium"
-            >
-              {resending
-                ? "Sending..."
-                : cooldown > 0
-                  ? `Resend in ${cooldown}s`
-                  : "Resend code"}
-            </button>
-          </div>
-        </>
-      )}
+          </>
+        )}
+      </div>
     </div>
   );
 };

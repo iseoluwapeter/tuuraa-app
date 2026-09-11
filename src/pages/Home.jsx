@@ -17,7 +17,7 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
 const STATUS_STYLES = {
-  Delivered: "bg-emerald-50 text-emerald-600",
+  // Delivered: "bg-emerald-50 text-emerald-600",
   completed: "bg-emerald-50 text-emerald-600",
   delivered: "bg-emerald-50 text-emerald-600",
   "In transit": "bg-amber-50 text-amber-600",
@@ -86,14 +86,14 @@ const buildActions = ({
       icon: FiPlus,
       disabled: isPendingReview,
     },
-    {
-      key: "track-order",
-      link: "/new-manifest",
-      label: "Track order",
-      sub: "Find a drop",
-      icon: FiSearch,
-      disabled: false,
-    },
+    // {
+    //   key: "track-order",
+    //   link: "/new-manifest",
+    //   label: "Track order",
+    //   sub: "Find a drop",
+    //   icon: FiSearch,
+    //   disabled: false,
+    // },
     {
       key: "get-quote",
       label: "Get quote",

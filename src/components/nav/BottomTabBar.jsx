@@ -1,6 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { FiHome, FiPackage, FiCreditCard, FiUser } from "react-icons/fi";
+import { InstallButton } from "../Installbutton";
 
 // Wire badgeCount from real state (e.g. pending/active deliveries count).
 // Leave undefined/0 to hide the badge.
@@ -10,6 +11,8 @@ const tabs = [
   // { to: "/wallet", label: "Wallet", icon: FiCreditCard },
   { to: "/account", label: "Account", icon: FiUser },
 ];
+
+<InstallButton />;
 
 const BottomTabBar = () => {
   return (

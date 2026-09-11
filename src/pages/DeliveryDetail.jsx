@@ -28,7 +28,7 @@ const STATUS_CONFIG = {
     label: "Out for Delivery",
     tone: "bg-blue-50 text-blue-700 border-blue-200",
   },
-  delivered: {
+  completed: {
     label: "Delivered",
     tone: "bg-emerald-50 text-emerald-700 border-emerald-200",
   },

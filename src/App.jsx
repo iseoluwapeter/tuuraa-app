@@ -18,6 +18,7 @@ import { queryClient } from "./components/queryClient";
 import Account from "./pages/Account";
 import BusinessDetails from "./pages/BusinessDetails";
 import Onboarding from "./pages/Onboarding";
+import { LandingPage } from "./components/LandingPage";
 
 const persister = createSyncStoragePersister({
   storage: window.localStorage,
@@ -27,10 +28,6 @@ const persister = createSyncStoragePersister({
 export default function App() {
   const fetchAccount = useAccountStore((s) => s.fetchAccount);
 
-  // Populate the store once on boot, and keep it in sync with auth events —
-  // login (including the auto-login right after OTP verification), logout,
-  // and token refresh all need to re-resolve who's signed in and what their
-  // account looks like, not just the very first page load.
   useEffect(() => {
     fetchAccount();
 
@@ -49,7 +46,8 @@ export default function App() {
       <Routes>
         {/* No top bar / bottom tabs — full-screen auth flow */}
         <Route element={<AuthLayout />}>
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/onboarding" element={<Onboarding />} />
         </Route>

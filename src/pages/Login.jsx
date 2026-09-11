@@ -45,46 +45,6 @@ const Login = () => {
     return Object.keys(errs).length === 0;
   };
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   setError("");
-
-  //   if (!validate()) return;
-
-  //   setLoading(true);
-
-  //   try {
-  //     const { error: authError } = await supabase.auth.signInWithPassword({
-  //       email: formData.email.trim(),
-  //       password: formData.password,
-  //     });
-
-  //     if (authError) {
-  //       setError(
-  //         authError.message === "Invalid login credentials"
-  //           ? "That email or password isn't right. Try again."
-  //           : authError.message,
-  //       );
-  //       return;
-  //     }
-
-  //     const {
-  //       data: { session },
-  //     } = await supabase.auth.getSession();
-
-  //     if (!session) {
-  //       setError("We couldn't sign you in. Please try again.");
-  //       return;
-  //     }
-
-  //     navigate("/home");
-  //   } catch (err) {
-  //     setError("Something went wrong. Check your connection and try again.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -111,28 +71,7 @@ const Login = () => {
         setError("We couldn't sign you in. Please try again.");
         return;
       }
-      console.log(session);
-
-      // ---- Portal-gating check ----
-      // Adjust "user_id" below to whatever column on `client` actually
-      // links to auth.users.id in your schema.
-      // const { data: client, error: clientError } = await supabase
-      //   .from("client")
-      //   .select("billing_preference")
-      //   .eq("auth_user_id", session.user.id)
-      //   .maybeSingle();
-
-      // if (clientError) {
-      //   await supabase.auth.signOut();
-      //   setError("Something went wrong verifying your account.");
-      //   return;
-      // }
-
-      // if (!client || client.billing_preference !== "payg") {
-      //   await supabase.auth.signOut();
-      //   setError("This account isn't set up for PWA access.");
-      //   return;
-      // }
+      // console.log(session);
 
       const { data: client, error: clientError } = await supabase
         .from("clients")
@@ -141,7 +80,7 @@ const Login = () => {
         .maybeSingle();
 
       if (clientError) {
-        console.error("Client lookup failed:", clientError); // check this in devtools
+        console.error("Client lookup failed:", clientError);
         await supabase.auth.signOut();
         setError("Something went wrong verifying your account.");
         return;
@@ -157,7 +96,6 @@ const Login = () => {
         setError("This account isn't set up for PWA access.");
         return;
       }
-      // ---- end gating check ----
 
       navigate("/home");
     } catch (err) {
@@ -166,10 +104,11 @@ const Login = () => {
       setLoading(false);
     }
   };
+
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-dvh bg-gray-50 sm:bg-gray-100 flex sm:justify-center">
       <div
-        className="max-w-md w-full mx-auto px-4 pt-10 pb-8 flex flex-col flex-1"
+        className="min-h-dvh w-full sm:max-w-md bg-gray-50 px-4 pt-10 pb-8 flex flex-col flex-1"
         style={{
           paddingTop: "max(env(safe-area-inset-top), 2.5rem)",
           paddingBottom: "max(env(safe-area-inset-bottom), 2rem)",
@@ -199,12 +138,12 @@ const Login = () => {
           </div>
         )}
 
-        {/* credentials card */}
+        {/* credentials + submit, same flex/gap rhythm as the signup form */}
         <form
           id="login-form"
           onSubmit={handleSubmit}
           noValidate
-          className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm space-y-4"
+          className="flex flex-col gap-4"
         >
           <div>
             <label
@@ -300,29 +239,30 @@ const Login = () => {
               </p>
             )}
           </div>
-        </form>
 
-        {/* primary action */}
-        <button
-          type="submit"
-          form="login-form"
-          disabled={loading}
-          className="w-full mt-4 flex items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3
-                     text-sm font-semibold text-white touch-manipulation active:bg-emerald-700
-                     disabled:opacity-50 transition"
-        >
-          {loading ? (
-            <>
-              <span className="w-4 h-4 rounded-full border-2 border-white/40 border-t-white animate-spin" />
-              Logging in...
-            </>
-          ) : (
-            <>
-              Log in
-              <FiArrowRight size={16} />
-            </>
-          )}
-        </button>
+          {/* primary action now lives inside the form, mt-2 below the last
+              field — same position it holds on the signup screen, instead
+              of floating directly under a cramped field stack */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="mt-2 h-12 flex items-center justify-center gap-2 rounded-xl bg-emerald-600
+                       text-sm font-semibold text-white touch-manipulation active:bg-emerald-700
+                       disabled:opacity-50 transition"
+          >
+            {loading ? (
+              <>
+                <span className="w-4 h-4 rounded-full border-2 border-white/40 border-t-white animate-spin" />
+                Logging in...
+              </>
+            ) : (
+              <>
+                Log in
+                <FiArrowRight size={16} />
+              </>
+            )}
+          </button>
+        </form>
 
         {/* footer */}
         <div className="mt-auto pt-8 flex items-center justify-center gap-1">

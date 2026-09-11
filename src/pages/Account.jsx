@@ -80,7 +80,7 @@ const ProfilePage = ({ onBack }) => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
 
-  console.log(user, client, status, fetchAccount);
+  // console.log(user, client, status, fetchAccount);
 
   // useEffect(() => {
   //   fetchAccount();
