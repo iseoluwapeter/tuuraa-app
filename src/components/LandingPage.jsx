@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { InstallButton } from "./Installbutton";
 
 /**
@@ -26,9 +27,9 @@ export function LandingPage() {
         </p>
 
         <div className="landing__actions">
-          <a href="/login" className="landing__login-btn">
+          <Link to="/login" className="landing__login-btn">
             Log In
-          </a>
+          </Link>
 
           {/* Renders nothing if install isn't available */}
           <InstallButton />
