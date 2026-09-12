@@ -30,6 +30,9 @@ export const PICKUP_ZONES = [
   "Bariga",
   "Gbagada",
   "Shomolu",
+  "Akute",
+  "Ajuwon",
+  "Iju-Ishaga",
 ];
 
 // Dropoff is open — anywhere in Lagos — this list is just dropdown
@@ -78,6 +81,9 @@ export const SERVICEABLE_PICKUP_CENTROIDS = {
   Bariga: { lat: 6.5309, lng: 3.3898 },
   Gbagada: { lat: 6.548, lng: 3.389 },
   Shomolu: { lat: 6.5388, lng: 3.376 },
+  Akute: { lat: 6.66, lng: 3.3292 },
+  Ajuwon: { lat: 6.674, lng: 3.3466 },
+  "Iju-Ishaga": { lat: 6.6366, lng: 3.3238 },
 };
 
 const PICKUP_ZONE_RADIUS_KM = 4;

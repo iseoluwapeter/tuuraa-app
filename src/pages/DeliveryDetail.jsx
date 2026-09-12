@@ -145,7 +145,7 @@ const DeliveryDetail = () => {
             <p className="mt-3 text-sm font-medium text-slate-700">
               Couldn&apos;t load this delivery
             </p>
-            <p className="mt-1 max-w-[230px] text-[13px] text-slate-400">
+            <p className="mt-1 max-w-57.5 text-[13px] text-slate-400">
               {error.message}
             </p>
             <button

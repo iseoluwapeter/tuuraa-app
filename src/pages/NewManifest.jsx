@@ -460,7 +460,7 @@ export default function NewManifest() {
                   </div>
                   {n < STEPS.length && (
                     <div
-                      className={`flex-1 h-[2px] mb-4 mx-1 ${done ? "bg-emerald-700" : "bg-stone-200"}`}
+                      className={`flex-1 h-0.5 mb-4 mx-1 ${done ? "bg-emerald-700" : "bg-stone-200"}`}
                     />
                   )}
                 </React.Fragment>
