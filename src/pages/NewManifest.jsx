@@ -317,23 +317,16 @@ export default function NewManifest() {
         throw new Error("An email address is required to pay.");
       }
 
-      // Re-confirm the price right now, even though a debounced quote may
-      // already be sitting in state. This closes the gap between "last
-      // typed a field" and "hit Pay" — the Paystack popup amount always
-      // comes from a confirmation fetched at this exact moment, never from
-      // a value that could have gone stale.
-      const result = await fetchFareQuote(supabase, buildOrderPayload());
-      if (isFareError(result)) {
-        throw new Error(result.error);
-      }
-      const confirmedQuote = result.quote;
+      // Single call: confirms price AND persists the pending draft
+      // server-side, so a reconciliation path (webhook or sweep) exists
+      // even if this browser never runs another line of JS after this.
+      const { data, error } = await supabase.functions.invoke("init-checkout", {
+        body: { reference: paymentRef, order: buildOrderPayload() },
+      });
+      if (error) throw new Error(error.message || "Could not start checkout.");
+      if (data?.error) throw new Error(data.error);
+      const confirmedQuote = data.quote;
 
-      // Collect payment in the Paystack popup — card, bank transfer, USSD or
-      // mobile money are all offered as channels inside the same checkout,
-      // so "bank transfer" is Paystack's own dynamic-account flow rather
-      // than a separate manual path. The popup succeeding is only a signal
-      // to check — the edge function is what actually confirms the money
-      // moved before anything is saved.
       await loadPaystackScript();
 
       await new Promise((resolve, reject) => {

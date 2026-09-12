@@ -1,0 +1,28 @@
+[functions.init-checkout]
+enabled = true
+verify_jwt = false
+import_map = "./functions/init-checkout/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/init-checkout/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/init-checkout/*.html" ]
+
+[functions.paystack-webhook]
+enabled = true
+verify_jwt = false
+import_map = "./functions/paystack-webhook/deno.json"
+entrypoint = "./functions/paystack-webhook/index.ts"
+
+[functions.confirm-pricing]
+enabled = true
+verify_jwt = false
+import_map = "./functions/confirm-pricing/deno.json"
+entrypoint = "./functions/confirm-pricing/index.ts"
+
+[functions.process-order]
+enabled = true
+verify_jwt = false
+import_map = "./functions/process-order/deno.json"
+entrypoint = "./functions/process-order/index.ts"
