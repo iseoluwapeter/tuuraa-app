@@ -13,7 +13,7 @@ export function InstallButton() {
       <button
         onClick={promptInstall}
         style={{
-          background: "#0F3D2E",
+          background: "#239751",
           color: "#fff",
           border: "none",
           borderRadius: 8,
@@ -35,7 +35,7 @@ export function InstallButton() {
         <button
           onClick={() => setShowIOSHelp(true)}
           style={{
-            background: "#0F3D2E",
+            background: "#239751",
             color: "#fff",
             border: "none",
             borderRadius: 8,

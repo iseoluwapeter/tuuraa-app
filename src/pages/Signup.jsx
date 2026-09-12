@@ -292,7 +292,7 @@ const Signup = () => {
     // tab/tablet it stops the form from stretching edge-to-edge.
     <div className="min-h-dvh bg-white sm:bg-neutral-50 flex sm:justify-center">
       <div
-        className="min-h-dvh w-full sm:max-w-[430px] flex flex-col bg-white px-6"
+        className="min-h-dvh w-full sm:max-w-107.5 flex flex-col bg-white px-6"
         style={{
           paddingTop: "max(env(safe-area-inset-top), 2rem)",
           paddingBottom: "max(env(safe-area-inset-bottom), 1.5rem)",

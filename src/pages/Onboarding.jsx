@@ -26,8 +26,9 @@ const STEPS = [
       },
       {
         value: "recurring",
-        label: "Recurring",
-        detail: "Monthly plan with a dedicated rider and coordinator.",
+        label: "Managed",
+        detail:
+          "Monthly logistics management with a dedicated coordinator and operator.",
         Icon: HiOutlineArrowPath,
       },
     ],
@@ -181,7 +182,7 @@ const Onboarding = ({ onComplete = () => {} }) => {
                 </span>
 
                 <span
-                  className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg ${
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
                     isSelected
                       ? "bg-emerald-700 text-white"
                       : "bg-amber-50 text-emerald-900"
@@ -206,7 +207,7 @@ const Onboarding = ({ onComplete = () => {} }) => {
 
       {/* Footer CTA */}
       <div
-        className="fixed inset-x-0 bottom-0 mx-auto max-w-md bg-gradient-to-t from-stone-50 from-65% to-transparent px-5 pt-3.5"
+        className="fixed inset-x-0 bottom-0 mx-auto max-w-md bg-linear-to-t from-stone-50 from-65% to-transparent px-5 pt-3.5"
         style={{ paddingBottom: "max(0.875rem, env(safe-area-inset-bottom))" }}
       >
         <button
